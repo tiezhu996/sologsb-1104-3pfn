@@ -6,9 +6,11 @@ interface StepRailProps {
   currentIndex: number
   onSelect: (index: number) => void
   onMove: (from: number, to: number) => void
+  onEdit?: (index: number) => void
+  onRemove?: (index: number) => void
 }
 
-export function StepRail({ steps, currentIndex, onSelect, onMove }: StepRailProps) {
+export function StepRail({ steps, currentIndex, onSelect, onMove, onEdit, onRemove }: StepRailProps) {
   const handleDrop = (event: DragEvent<HTMLElement>, to: number) => {
     event.preventDefault()
     const from = Number(event.dataTransfer.getData('text/plain'))
@@ -56,7 +58,27 @@ export function StepRail({ steps, currentIndex, onSelect, onMove }: StepRailProp
               <span className="mt-1 block text-[11px] text-wood-700">停留 {step.holdSec} 秒</span>
             </span>
           </button>
-          <div className="mt-2 flex justify-end">
+          <div className="mt-2 flex items-center justify-end gap-1.5">
+            {onEdit ? (
+              <button
+                type="button"
+                data-testid="step-edit"
+                onClick={() => onEdit(index)}
+                className="rounded px-2 py-1 text-[11px] text-wood-700 transition hover:bg-wood-50"
+              >
+                编辑
+              </button>
+            ) : null}
+            {onRemove ? (
+              <button
+                type="button"
+                data-testid="step-remove"
+                onClick={() => onRemove(index)}
+                className="rounded px-2 py-1 text-[11px] text-rose-700 transition hover:bg-rose-50"
+              >
+                删除
+              </button>
+            ) : null}
             <span className="cursor-grab select-none rounded px-2 py-1 text-[11px] text-stone-400 group-active:cursor-grabbing">
               拖动调序
             </span>

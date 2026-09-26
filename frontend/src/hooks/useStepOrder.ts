@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { useStepStore } from '../stores/stepStore'
+import { useStepStore, type StepDraft } from '../stores/stepStore'
 import type { DisassemblyStep } from '../types/step'
 
 interface StepOrderResult {
@@ -7,6 +7,9 @@ interface StepOrderResult {
   totalDurationSec: number
   currentStepIndex: number
   move: (from: number, to: number) => Promise<void>
+  addStep: (draft: StepDraft) => Promise<void>
+  updateStep: (step: DisassemblyStep) => Promise<void>
+  removeStep: (stepId: string) => Promise<void>
   setCurrentStep: (index: number) => void
 }
 
@@ -37,11 +40,26 @@ export function useStepOrder(jointTypeId: string): StepOrderResult {
     await useStepStore.getState().moveStep(from, to)
   }, [])
 
+  const addStep = useCallback(async (draft: StepDraft) => {
+    await useStepStore.getState().addStep(jointTypeId, draft)
+  }, [jointTypeId])
+
+  const updateStep = useCallback(async (step: DisassemblyStep) => {
+    await useStepStore.getState().updateStep(step)
+  }, [])
+
+  const removeStep = useCallback(async (stepId: string) => {
+    await useStepStore.getState().removeStep(stepId)
+  }, [])
+
   return {
     steps,
     totalDurationSec,
     currentStepIndex: Math.min(currentStepIndex, Math.max(0, steps.length - 1)),
     move,
+    addStep,
+    updateStep,
+    removeStep,
     setCurrentStep,
   }
 }

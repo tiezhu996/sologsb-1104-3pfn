@@ -16,6 +16,7 @@ interface DiagramState {
   setDraftTitle: (title: string) => void
   saveDraft: () => Promise<void>
   saveDiagram: (diagram: Diagram) => Promise<void>
+  removeDiagramsForStep: (stepId: string) => Promise<void>
 }
 
 export const useDiagramStore = create<DiagramState>((set, get) => ({
@@ -81,5 +82,23 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
       draftSvgMarkup: state.selectedDiagramId === diagram.id ? diagram.svgMarkup : state.draftSvgMarkup,
       draftTitle: state.selectedDiagramId === diagram.id ? diagram.title : state.draftTitle,
     }))
+  },
+
+  removeDiagramsForStep: async (stepId) => {
+    await db.diagrams.where('stepId').equals(stepId).delete()
+    set((state) => {
+      const diagrams = state.diagrams.filter((diagram) => diagram.stepId !== stepId)
+      const selectedDiagramId = diagrams.some((diagram) => diagram.id === state.selectedDiagramId)
+        ? state.selectedDiagramId
+        : diagrams[0]?.id ?? null
+      const selected = diagrams.find((diagram) => diagram.id === selectedDiagramId)
+      return {
+        diagrams,
+        selectedDiagramId,
+        selectedMemberId: selectedDiagramId === state.selectedDiagramId ? state.selectedMemberId : null,
+        draftSvgMarkup: selected?.svgMarkup ?? '',
+        draftTitle: selected?.title ?? '',
+      }
+    })
   },
 }))
